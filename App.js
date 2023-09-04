@@ -71,7 +71,7 @@ const Graph = () => {
 // Define a force to keep nodes within a bounding box
 
 
-useEffect(() => {
+const updateGraph = () => {
   const flatNodes = flattenData(data);
   // Create links based on parent-child relationships
   const createdLinks = flatNodes.map((node) => node.children?.map((child) => ({ source: node, target: child })) ?? []).flat();
@@ -91,19 +91,23 @@ useEffect(() => {
       node.y = Math.max(30, Math.min(250 - 30, node.y));
     }
   } 
+};
+
+
+const handleNodeClick = (node) => {
+  if (node.children) {
+    node._children = node.children;
+    node.children = null;
+  } else {
+    node.children = node._children;
+    node._children = null;
+  }
+  updateGraph();
+};
+
+useEffect(() => {
+  updateGraph();
 }, []);
-
-
-  const handleNodeClick = (node) => {
-    if (node.children) {
-      node._children = node.children;
-      node.children = null;
-    } else {
-      node.children = node._children;
-      node._children = null;
-    }
-    setNodes([...nodes]);
-  };
 
   const nodeColor = (node) => {
     return node._children ? "#3182bd" : node.children ? "#c6dbef" : "#fd8d3c";
@@ -127,7 +131,8 @@ useEffect(() => {
         {console.log(links)}
         {
         nodes.map((node, index) => (
-             <G key={index} transform={`translate(${node.x}, ${node.y})`}>
+             <G key={index} transform={`translate(${node.x}, ${node.y})`}
+             onClick={() => handleNodeClick(node)}>
               <Circle
                 //r={10}  // Fixed radius for debugging
                 //fill={"red"}  // Fixed color for debugging
