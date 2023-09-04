@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Svg, Circle, Text, Line, G } from 'react-native-svg';
 import * as d3 from 'd3';
+import { Platform } from 'react-native';
 const height= 500
 const width= 960
 const data = {
@@ -96,6 +97,7 @@ const updateGraph = () => {
 
 
 const handleNodeClick = (node) => {
+  console.log("Node clicked", node);
   if (node.children) {
     node._children = node.children;
     node.children = null;
@@ -117,6 +119,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <Svg height={height} width={width}>
+        {/* Render links (edges) */}
         {links.map((link, index) => (
           <Line
             key={index}
@@ -128,17 +131,24 @@ useEffect(() => {
             strokeWidth="1.5"
           />
         ))}
-
-        {
-        nodes.map((node, index) => (
-             <G key={index} transform={`translate(${node.x}, ${node.y})`}
-             onClick={() => handleNodeClick(node)}>
-              <Circle
-                r={Math.sqrt(node.size) / 10 || 4.5}
-                fill={nodeColor(node)}
-                stroke="#3182bd"
-                strokeWidth="1.5"
-              />
+  
+        {/* Render nodes */}
+        {nodes.map((node, index) => {
+          const commonProps = {
+            r: Math.sqrt(node.size) / 5 || 10.5,
+            fill: nodeColor(node),
+            stroke: "#3182bd",
+            strokeWidth: "1.5",
+          };
+          return (
+            <G key={index} transform={`translate(${node.x}, ${node.y})`}>
+              {Platform.OS === 'web' ? (
+                <G onClick={() => handleNodeClick(node)}>
+                  <Circle {...commonProps} />
+                </G>
+              ) : (
+                <Circle {...commonProps} onPress={() => handleNodeClick(node)} />
+              )}
               <Text
                 dy="-10"  // Adjust this value to your requirement
                 fontSize="10"
@@ -147,8 +157,13 @@ useEffect(() => {
                 {node.name}
               </Text>
             </G>
-         ))}
+          );
+        })}
       </Svg>
+      {/* Debugging Pressable */}
+      <Pressable onPress={() => console.log("Clicked!")}>
+        <View style={{ width: 50, height: 50, backgroundColor: 'red' }} />
+      </Pressable>
     </View>
   );
 };
