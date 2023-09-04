@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Svg, Circle, Text, Line, G } from 'react-native-svg';
 import * as d3 from 'd3';
-
+const height= 500
+const width= 960
 const data = {
   name: "flare",
   children: [{
@@ -79,7 +80,7 @@ const updateGraph = () => {
   const simulation = d3.forceSimulation(flatNodes)
   .force('link', d3.forceLink(createdLinks).distance(80))
   .force('charge', d3.forceManyBody().strength(-120))
-  .force('center', d3.forceCenter(480 / 2, 250 / 2))
+  .force('center', d3.forceCenter(width / 2, height / 2))
   .force('boundary', boundingBoxForce)
   .on('tick', () => {
     setNodes([...flatNodes]);
@@ -87,8 +88,8 @@ const updateGraph = () => {
   });
   function boundingBoxForce() {
     for (const node of flatNodes) {
-      node.x = Math.max(30, Math.min(480 - 30, node.x));
-      node.y = Math.max(30, Math.min(250 - 30, node.y));
+      node.x = Math.max(30, Math.min(width - 30, node.x));
+      node.y = Math.max(30, Math.min(height - 30, node.y));
     }
   } 
 };
@@ -115,7 +116,7 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
-      <Svg height="500" width="960">
+      <Svg height={height} width={width}>
         {links.map((link, index) => (
           <Line
             key={index}
@@ -127,22 +128,19 @@ useEffect(() => {
             strokeWidth="1.5"
           />
         ))}
-        {console.log(nodes)}
-        {console.log(links)}
+
         {
         nodes.map((node, index) => (
              <G key={index} transform={`translate(${node.x}, ${node.y})`}
              onClick={() => handleNodeClick(node)}>
               <Circle
-                //r={10}  // Fixed radius for debugging
-                //fill={"red"}  // Fixed color for debugging
                 r={Math.sqrt(node.size) / 10 || 4.5}
                 fill={nodeColor(node)}
                 stroke="#3182bd"
                 strokeWidth="1.5"
               />
               <Text
-                dy="0.35em"
+                dy="-10"  // Adjust this value to your requirement
                 fontSize="10"
                 textAnchor="middle"
               >
